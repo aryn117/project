@@ -1,4 +1,3 @@
-// filepath: /C:/Users/Aryan/Desktop/project/vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -8,12 +7,12 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icon_96.png','icon_144.png','icon_192.png', 'icon_512.png' , 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'Tor-Hopper',
-        short_name: 'Tor-Hopper',
-        description: 'A Torrent Aggregator App',
-        theme_color: '#ffffff',
+        name: 'TorrentHub',
+        short_name: 'TorrentHub',
+        description: 'Torrent Search Aggregator',
+        theme_color: '#2E86C1',
         icons: [
           {
             src: 'icon_192.png',
@@ -26,7 +25,7 @@ export default defineConfig({
             type: 'image/png'
           },
           {
-            src: 'icon_512.png',
+            src: 'maskable_icon.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'

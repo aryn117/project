@@ -33,15 +33,15 @@ function Trending() {
   );
 
   return (
-    <div className="container px-4 py-8 mx-auto">
-      <div className="mb-12 text-center">
-        <h1 className="mb-4 font-mono text-3xl font-bold md:text-5xl">Trending Torrents</h1>
-        <p className="font-mono text-xl text-base-content/70">Most popular torrents right now</p>
+    <div className="container mx-auto px-4 py-8">
+      <div className="text-center mb-12">
+        <h1 className="text-5xl font-bold font-mono mb-4">Trending Torrents</h1>
+        <p className="text-xl text-base-content/70 font-mono">Most popular torrents right now</p>
       </div>
 
-      <div className="flex justify-center gap-2 mb-8">
+      <div className="flex gap-2 mb-8 justify-center">
         <select 
-          className="font-mono select select-bordered"
+          className="select select-bordered font-mono"
           value={selectedSite}
           onChange={(e) => setSelectedSite(e.target.value)}
         >
@@ -67,7 +67,7 @@ function Trending() {
 
       {data && (
         <>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {data.data.map((torrent, index) => (
               <TorrentCard key={index} torrent={torrent} />
             ))}

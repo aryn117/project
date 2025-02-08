@@ -1,35 +1,22 @@
 import { useState } from 'react';
 import { useQuery } from 'react-query';
-import { searchAllSites, searchTorrents } from '../api/torrentApi';
+import { searchAllSites } from '../api/torrentApi';
 import LoadingSpinner from '../components/LoadingSpinner';
 import TorrentCard from '../components/TorrentCard';
 import Pagination from '../components/Pagination';
-import CategoryFilter from '../components/CategoryFilter';
+import SortSelect from '../components/SortSelect';
 import toast from 'react-hot-toast';
 
 function Home() {
   const [query, setQuery] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSite, setSelectedSite] = useState('all');
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
-
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [sortBy, setSortBy] = useState('');
+  const [sortOrder, setSortOrder] = useState('desc');
 
   const { data, isLoading, error } = useQuery(
-    ['search', searchTerm, selectedSite, selectedCategory, currentPage],
-    () => {
-      if (selectedSite === 'all') {
-        return searchAllSites({ query: searchTerm, limit: 20, page: currentPage });
-      }
-      return searchTorrents({
-        site: selectedSite,
-        query: searchTerm,
-        limit: 20,
-        page: currentPage,
-        category: selectedCategory !== 'All' ? selectedCategory.toLowerCase() : undefined
-      });
-    },
+    ['search', searchTerm, currentPage],
+    () => searchAllSites({ query: searchTerm, limit: 20, page: currentPage }),
     {
       enabled: !!searchTerm,
       onError: (err) => {
@@ -37,71 +24,77 @@ function Home() {
       },
     }
   );
-  // Forhandling the app install prompt
-  const handleInstallClick = () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the install prompt');
-        } else {
-          console.log('User dismissed the install prompt');
-        }
-        setDeferredPrompt(null);
-      });
-    }
-  };
-  
+
   const handleSearch = (e) => {
     e.preventDefault();
     setSearchTerm(query);
     setCurrentPage(1);
   };
 
+  const sortTorrents = (torrents) => {
+    if (!sortBy || !torrents) return torrents;
+
+    return [...torrents].sort((a, b) => {
+      if (sortBy === 'seeders') {
+        const aValue = parseInt((a?.seeders || '0').replace(/,/g, ''));
+        const bValue = parseInt((b?.seeders || '0').replace(/,/g, ''));
+        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      
+      if (sortBy === 'size') {
+        const getSizeInBytes = (size) => {
+          if (!size) return 0;
+          const units = { 'KB': 1, 'MB': 2, 'GB': 3, 'TB': 4 };
+          const matches = size.match(/^([\d.]+)\s*([KMGT]B)$/i);
+          if (!matches) return 0;
+          const [, value, unit] = matches;
+          return parseFloat(value) * Math.pow(1024, units[unit.toUpperCase()] || 0);
+        };
+        const aSize = getSizeInBytes(a?.size);
+        const bSize = getSizeInBytes(b?.size);
+        return sortOrder === 'asc' ? aSize - bSize : bSize - aSize;
+      }
+
+      return 0;
+    });
+  };
+
+  const sortedTorrents = data?.data ? sortTorrents(data.data) : [];
+
   return (
     <div className="container px-4 py-8 mx-auto">
-      <button onClick={handleInstallClick} className="absolute p-1 text-2xl btn btn-primary bottom-2 left-2btn-rounded">⬇️</button>
-      <div className="mb-12 text-center">
-        <h1 className="mb-4 font-mono text-3xl font-bold md:text-5xl">Tor Hopper</h1>
-        <p className="font-mono text-lg md:text-xl text-base-content/70">Search across multiple torrent sites</p>
+      <div className='flex justify-center w-full mb-12 font-mono text-3xl font-semibold md:text-5xl' >
+        Search
       </div>
-
-      <div className="max-w-3xl mx-auto mb-8 l ">
-        <form onSubmit={handleSearch} className="flex flex-col gap-2 mb-4 md:flex-row">
-          {/* Site Selection DropDown list */}
-          <select
-            className="font-mono select w-fit select-bordered"
-            value={selectedSite}
-            onChange={(e) => setSelectedSite(e.target.value)}
-          >
-            <option value="all">All Sites</option>
-            <option value="1337x">1337x</option>
-            <option value="piratebay">Pirate Bay</option>
-            <option value="rarbg">RARBG</option>
-          </select>
-          {/* Search Bar and Button Container */}
-          <div className='w-full' >
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search torrents..."
-              className="flex-1 font-mono input input-bordered"
-            />
-            <button type="submit" className="ml-2 font-mono btn btn-primary">
-              Search
-            </button>
-          </div>
+      
+      <div className="max-w-3xl mx-auto mb-8">
+        <form onSubmit={handleSearch} className="flex gap-2">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search torrents..."
+            className="flex-1 font-mono active:outline-none input "
+          />
+          <button type="submit" className="font-mono btn btn-primary">
+            Search
+          </button>
         </form>
       </div>
 
-      <CategoryFilter
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-      />
+      {data && (
+        <div className="flex justify-end mb-4">
+          <SortSelect
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        </div>
+      )}
 
       {isLoading && <LoadingSpinner />}
-
+      
       {error && (
         <div className="alert alert-error">
           <span>{error.message || 'Something went wrong'}</span>
@@ -111,11 +104,11 @@ function Home() {
       {data && (
         <>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {data.data.map((torrent, index) => (
+            {sortedTorrents.map((torrent, index) => (
               <TorrentCard key={index} torrent={torrent} />
             ))}
           </div>
-
+          
           {data.total_pages > 1 && (
             <Pagination
               currentPage={currentPage}

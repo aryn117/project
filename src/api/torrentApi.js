@@ -6,7 +6,7 @@ export const api = axios.create({
   baseURL: BASE_URL,
 });
 
-export const searchTorrents = async ({ site, query, limit = 20, page = 1 }) => {
+export const searchTorrents = async ({ site, query, limit = 50, page = 1 }) => {
   const { data } = await api.get('/search', { params: { site, query, limit, page } });
   return data;
 };
