@@ -9,13 +9,12 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'TorrentHub',
-        short_name: 'TorrentHub',
+        name: 'TorHopper',
         description: 'Torrent Search Aggregator',
         theme_color: '#2E86C1',
         icons: [
           {
-            src: 'icon_192.png',
+            src: 'icon_x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
@@ -25,7 +24,7 @@ export default defineConfig({
             type: 'image/png'
           },
           {
-            src: 'maskable_icon.png',
+            src: 'masked-icon.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'

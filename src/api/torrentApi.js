@@ -1,37 +1,43 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://magnet-server.onrender.com/api/v1';
+
+const BASE_URL = 'https://torhopper-backend.vercel.app/api/';
 
 export const api = axios.create({
   baseURL: BASE_URL,
 });
 
-export const searchTorrents = async ({ site, query, limit = 50, page = 1 }) => {
-  const { data } = await api.get('/search', { params: { site, query, limit, page } });
-  return data;
+export const searchTorrents = async ({ site, query, page = 1 }) => {
+  console.log('searchTorrents fired')
+  const { data } = await api.get(`/${site}/${query}/${page}`);
+
+  const returnData = data.reduce((acc, curr) => {
+    return acc.concat(curr);
+  }, []);
+
+  console.log(returnData)
+  return returnData;
 };
 
-export const getTrending = async ({ site, limit = 20, category, page = 1 }) => {
-  const { data } = await api.get('/trending', { params: { site, limit, category, page } });
-  return data;
+
+
+export const searchAllSites = async ({ query, page = 1 }) => {
+
+  console.log('searchALLsites fired')
+
+  const { data } = await api.get(`/all/${query}/${page}`);
+  console.log("data from SearchAllSites", data);
+
+  const returnData = data
+    .reduce((acc, obj) => {
+      const values = Object.values(obj).flat();
+      return acc.concat(values);
+    }, []).sort((a, b) => b.seeders - a.seeders);
+
+  console.log("returnData from SearchAllSites", returnData);
+  return returnData;
 };
 
-export const getRecent = async ({ site, limit = 20, category, page = 1 }) => {
-  const { data } = await api.get('/recent', { params: { site, limit, category, page } });
-  return data;
-};
 
-export const searchAllSites = async ({ query, limit = 20 }) => {
-  const { data } = await api.get('/all/search', { params: { query, limit } });
-  return data;
-};
 
-export const getAllTrending = async ({ limit = 20 }) => {
-  const { data } = await api.get('/all/trending', { params: { limit } });
-  return data;
-};
 
-export const getAllRecent = async ({ limit = 20 }) => {
-  const { data } = await api.get('/all/recent', { params: { limit } });
-  return data;
-};
