@@ -3,7 +3,7 @@ function TorrentCard({ torrent }) {
     <div className="shadow-xl card bg-base-100">
      
       <div className="card-body">
-        <h2 className="text-sm card-title">{torrent.name}</h2>
+        <h2 className="text-sm break-words card-title">{torrent.name || torrent.Name}</h2>
         <div className="flex gap-2 text-sm">
           <span className="text-lg badge badge-primary">{torrent.size}</span>
           <span className="text-lg badge badge-secondary">S: {torrent.seeders}</span>
