@@ -48,14 +48,14 @@ function Settings() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container px-4 py-8 mx-auto">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold font-mono mb-8">Settings</h1>
+        <h1 className="mb-8 font-mono text-4xl font-bold">Settings</h1>
         
-        <div className="card bg-base-100 shadow-xl">
+        <div className="shadow-xl card bg-base-100">
           <div className="card-body">
-            <h2 className="card-title font-mono mb-6">Themes</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <h2 className="mb-6 font-mono card-title">Themes</h2>
+            <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
               {themes.map((t) => (
                 <div
                   key={t.name}
@@ -63,7 +63,7 @@ function Settings() {
                   onClick={() => handleThemeChange(t.name)}
                 >
                   <div
-                    className={`w-12 h-12 rounded-full border-4 ${
+                    className={`w-12 h-12 rounded-md border-4 ${
                       theme === t.name ? 'border-primary' : 'border-transparent'
                     }`}
                     style={{
@@ -71,7 +71,7 @@ function Settings() {
                       boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                     }}
                   />
-                  <span className="text-sm font-mono capitalize">
+                  <span className="font-mono text-sm capitalize">
                     {t.name}
                   </span>
                 </div>
