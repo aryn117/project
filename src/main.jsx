@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 
+import { SettingsProvider } from './contexts/settingsContext.jsx'
+
+
 // Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -16,6 +19,8 @@ if ('serviceWorker' in navigator) {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <SettingsProvider>
+      <App />
+    </SettingsProvider>
   </StrictMode>,
 )

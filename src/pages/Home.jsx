@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useQuery } from 'react-query';
-import { searchAllSites, searchSingleSite } from '../api/torrentApi';
+import { searchTorrent } from '../api/torrentApi';
 import LoadingSpinner from '../components/LoadingSpinner';
 import TorrentCard from '../components/TorrentCard';
+
+import { useSettings } from '../contexts/settingsContext';
 
 import toast from 'react-hot-toast';
 
@@ -11,35 +12,66 @@ import { FaCaretRight } from "react-icons/fa";
 import SiteSelector from '../components/SiteSelector';
 
 function Home() {
-  const [query, setQuery] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [siteToSearch, setSiteToSearch] = useState("1337x");
+  const { settings } = useSettings();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [torrents, setTorrents] = useState([]);
+
   const [sortBy, setSortBy] = useState('');
   const [sortOrder, setSortOrder] = useState('desc');
 
-  const { data, isLoading, error } = useQuery(
-    ['search', searchTerm, currentPage],
-    () => {
-      if(siteToSearch === "all") {
-       return searchAllSites({ query: searchTerm, page: currentPage });
-      } else {
-         return searchSingleSite({ site: siteToSearch, query: searchTerm, page: currentPage });
-      }
-    },
-    {
-      enabled: !!searchTerm,
-      onError: (err) => {
-        toast.error(err.message || 'Failed to fetch results');
-      },
-    }
-  );
 
-  const handleSearch = (e) => {
+console.log(settings.resultLayout);
+
+  const handleSearch = async (e) => {
     e.preventDefault();
-    setSearchTerm(query);
+  setTorrents([]);
+    setError(null);
+    setIsLoading(true);
+
+    // validate query and currentpage
+    if (!searchTerm) {
+      toast.error('Please enter a search term.');
+      setIsLoading(false);
+      return;
+    } else if (currentPage < 1) {
+      setCurrentPage(1);
+      toast.error('Page Number was Invalid. Try Again Now!');
+      return;
+    }
+
+    setSearchTerm(searchTerm);
     setCurrentPage(currentPage);
-    
+
+    try {
+
+      const data = await searchTorrent({ query: searchTerm, page: currentPage, site: siteToSearch });
+
+      if (Object.keys(data)[0] === 'error') {
+        throw new Error(data.error);
+      } else {
+        setTorrents(data);
+        console.log("Response from searchTorrent: ", data);
+
+      }
+
+
+    } catch (error) {
+      console.error('Error in handleSearch:', error);
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+
+
+
+
+
+
     console.log('Current Page:', currentPage, "searchTerm:", searchTerm);
   };
 
@@ -54,16 +86,16 @@ function Home() {
 
         <SiteSelector siteToSearch={siteToSearch} setSiteToSearch={setSiteToSearch} />
 
-        <div className="max-w-3xl mx-auto mb-8">
+        <div className="max-w-3xl mt-4 md:mt-6 mx-auto mb-8">
           <form onSubmit={handleSearch} className="flex gap-2">
             <input
               type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search torrents..."
-              className="flex-1 font-mono active:outline-none input "
+              className="flex-1 font-mono text-sm md:text-md input input-sm md:input-md input-primary"
             />
-            <button type="submit" className="font-mono btn btn-primary">
+            <button type="submit" className="font-mono btn btn-sm md:btn-md  btn-primary">
               Search
             </button>
           </form>
@@ -71,9 +103,9 @@ function Home() {
 
 
         {
-          data && (
+          torrents && torrents.length > 0 && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {data.map((torrent) => (
+              {torrents.map((torrent) => (
                 <TorrentCard key={torrent.url} torrent={torrent} />
               ))}
             </div>
@@ -93,7 +125,7 @@ function Home() {
 
 
       </div>
-      {data &&
+      {torrents && torrents.length > 0 &&
 
         <div className="flex mb-6 bottom-0 h-12  justify-center items-center w-full py-2  z-50  ">
           <button className="join-btn btn-outline mx-2 btn" onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)} ><FaCaretLeft /></button>

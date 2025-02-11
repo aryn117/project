@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from 'react-query';
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useEffect } from 'react';
@@ -6,18 +6,25 @@ import { useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 
+
 import Settings from './pages/Settings';
 
-const queryClient = new QueryClient();
+import { useSettings } from './contexts/settingsContext';
+
+
 
 function App() {
+  const { settings } = useSettings();
+
   useEffect(() => {
-    const theme = localStorage.getItem('theme') || 'dark';
+    const theme = settings.theme;
     document.documentElement.setAttribute('data-theme', theme);
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
+
+    <>
+
       <Router>
         <div className="min-h-screen bg-base-200">
           <Navbar />
@@ -28,7 +35,9 @@ function App() {
         </div>
       </Router>
       <Toaster position="bottom-right" />
-    </QueryClientProvider>
+
+    </>
+
   );
 }
 
