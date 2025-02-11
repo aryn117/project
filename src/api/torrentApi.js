@@ -7,15 +7,16 @@ export const api = axios.create({
   baseURL: BASE_URL,
 });
 
-export const searchTorrents = async ({ site, query, page = 1 }) => {
-  console.log('searchTorrents fired')
+export const searchSingleSite = async ({ site, query, page = 1 }) => {
+  console.log('searchSingleSite fired', site, query, page);
+
   const { data } = await api.get(`/${site}/${query}/${page}`);
-
-  const returnData = data.reduce((acc, curr) => {
-    return acc.concat(curr);
-  }, []);
-
-  console.log(returnData)
+  console.log("data from SearchSingleSite", data);
+  const returnData = Object.values(data)[0];
+  console.log("returnData from SearchSingleSite", returnData);
+  if(returnData.includes("No Search Result")) {
+    return [];
+  }
   return returnData;
 };
 

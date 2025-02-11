@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from 'react-query';
-import { searchAllSites } from '../api/torrentApi';
+import { searchAllSites, searchSingleSite } from '../api/torrentApi';
 import LoadingSpinner from '../components/LoadingSpinner';
 import TorrentCard from '../components/TorrentCard';
 
@@ -8,17 +8,25 @@ import toast from 'react-hot-toast';
 
 import { FaCaretLeft } from "react-icons/fa";
 import { FaCaretRight } from "react-icons/fa";
+import SiteSelector from '../components/SiteSelector';
 
 function Home() {
   const [query, setQuery] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [siteToSearch, setSiteToSearch] = useState("1337x");
   const [sortBy, setSortBy] = useState('');
   const [sortOrder, setSortOrder] = useState('desc');
 
   const { data, isLoading, error } = useQuery(
     ['search', searchTerm, currentPage],
-    () => searchAllSites({ query: searchTerm, page: currentPage }),
+    () => {
+      if(siteToSearch === "all") {
+       return searchAllSites({ query: searchTerm, page: currentPage });
+      } else {
+         return searchSingleSite({ site: siteToSearch, query: searchTerm, page: currentPage });
+      }
+    },
     {
       enabled: !!searchTerm,
       onError: (err) => {
@@ -31,6 +39,7 @@ function Home() {
     e.preventDefault();
     setSearchTerm(query);
     setCurrentPage(currentPage);
+    
     console.log('Current Page:', currentPage, "searchTerm:", searchTerm);
   };
 
@@ -42,6 +51,8 @@ function Home() {
         <div className='flex justify-center w-full mb-12 font-mono text-3xl font-semibold md:text-5xl' >
           Search
         </div>
+
+        <SiteSelector siteToSearch={siteToSearch} setSiteToSearch={setSiteToSearch} />
 
         <div className="max-w-3xl mx-auto mb-8">
           <form onSubmit={handleSearch} className="flex gap-2">
@@ -85,15 +96,10 @@ function Home() {
       {data &&
 
         <div className="flex mb-6 bottom-0 h-12  justify-center items-center w-full py-2  z-50  ">
-
-          <button className="join-btn btn-outline mx-2 btn" onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)} ><FaCaretLeft/></button>
+          <button className="join-btn btn-outline mx-2 btn" onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)} ><FaCaretLeft /></button>
           <button className="join-item btn-outline mx-2 btn">{currentPage}</button>
-          <button className="join-item btn-outline mx-2  btn" onClick={() => setCurrentPage(currentPage + 1)} > <FaCaretRight/> </button>
+          <button className="join-item btn-outline mx-2  btn" onClick={() => setCurrentPage(currentPage + 1)} > <FaCaretRight /> </button>
         </div>
-
-
-
-
       }
     </>
   );
