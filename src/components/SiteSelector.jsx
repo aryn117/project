@@ -1,7 +1,7 @@
 export default function({ siteToSearch, setSiteToSearch  }) {
 
     const sites = [
-        "all",
+   
         "1337x",
         "torrentgalaxy",
         "rarbg",
@@ -17,7 +17,7 @@ export default function({ siteToSearch, setSiteToSearch  }) {
  
 
       return (
-        <div className="grid gap-2 grid-flow-col grid-rows-3 md:grid-rows-2 xl:grid-rows-1 ">
+        <div className="grid gap-1 md:gap-2 grid-flow-col grid-rows-3 md:grid-rows-2 xl:grid-rows-1 ">
           {sites.map((site) => (
             <button
               key={site}
@@ -26,7 +26,7 @@ export default function({ siteToSearch, setSiteToSearch  }) {
               }`}
               onClick={() => handleSelect(site)}
             >
-              {site === "all" ? "All Sites" : null}
+        
               {site === "1337x" ? "1337x" : null}
               {site === "torrentgalaxy" ? "Torrent Galaxy" : null}
               {site === "torrentproject" ? "Torrent Project" : null}

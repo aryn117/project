@@ -19,7 +19,7 @@ function App() {
   useEffect(() => {
     const theme = settings.theme;
     document.documentElement.setAttribute('data-theme', theme);
-  }, []);
+  }, [settings.theme]);
 
   return (
 

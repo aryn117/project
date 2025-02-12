@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
-function Settings() {
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'dark';
-  });
-  const [resultLayout, setResultLayout] = useState(() => {
-    return localStorage.getItem('resultLayout') || 'card';
-  });
+import { useSettings } from '../contexts/settingsContext';
 
+function Settings() {
+
+  const { settings, updateSettings } = useSettings();
+
+
+ 
   const themes = [
     { name: 'light', color: '#ffffff' },
     { name: 'dark', color: '#1d232a' },
@@ -41,14 +41,22 @@ function Settings() {
   ];
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+    console.log("refreshed")
+  }, [settings]);
 
   const handleThemeChange = (newTheme) => {
-    setTheme(newTheme);
+    updateSettings('theme', newTheme );
     toast.success(`Theme updated to ${newTheme}!`);
   };
+
+  const handleResultLayoutChange = (newLayout) => { 
+
+    updateSettings('resultLayout' , newLayout);
+    toast.success(`Result layout updated to ${newLayout}!`);
+  };
+
+
+  console.log('Settings:', settings);
 
   return (
     <div className="container px-4 py-8 mx-auto">
@@ -61,9 +69,9 @@ function Settings() {
             <h2 className="mb-6  font-mono card-title">Results Layout</h2>
          
               <ul className="menu menu-horizontal bg-base-200 w-fit rounded-box">
-                <li><a>Card</a></li>
-                <li><a>Compact Card</a></li>
-                <li><a>Table</a></li>
+                <li className={`${settings.resultLayout === 'card' ? 'bg-primary text-white' : ''}`}  onClick={() => handleResultLayoutChange('card')} ><a>Card</a></li>
+                <li className={`${settings.resultLayout === 'compact-card' ? 'bg-primary text-white' : ''}`} onClick={() => handleResultLayoutChange('compact-card')} ><a>Compact Card</a></li>
+                <li className={`${settings.resultLayout === 'table' ? 'bg-primary text-white' : ''}`} onClick={() => handleResultLayoutChange('table')} ><a>Table</a></li>
               </ul>
        
 
@@ -81,7 +89,7 @@ function Settings() {
                   onClick={() => handleThemeChange(t.name)}
                 >
                   <div
-                    className={`w-12 h-12 rounded-md border-4 ${theme === t.name ? 'border-primary' : 'border-transparent'
+                    className={`w-12 h-12 rounded-md border-4 ${settings.theme === t.name ? 'border-primary' : 'border-transparent'
                       }`}
                     style={{
                       backgroundColor: t.color,

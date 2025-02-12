@@ -12,6 +12,7 @@ import { FaCaretRight } from "react-icons/fa";
 import SiteSelector from '../components/SiteSelector';
 
 function Home() {
+
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [siteToSearch, setSiteToSearch] = useState("1337x");
@@ -23,70 +24,106 @@ function Home() {
 
   const [sortBy, setSortBy] = useState('');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [sortKey, setSortKey] = useState('seeders');
+  
+  
+  
+  // ////////////////////////////////////////////////////////////////////////////////
+  const handleSearch = async (event) => {
+    event.preventDefault();
 
+    const pageNumber = currentPage;
+    const query = searchTerm.trim();
 
-console.log(settings.resultLayout);
-
-  const handleSearch = async (e) => {
-    e.preventDefault();
-  setTorrents([]);
-    setError(null);
-    setIsLoading(true);
-
-    // validate query and currentpage
-    if (!searchTerm) {
+    if (!query) {
       toast.error('Please enter a search term.');
-      setIsLoading(false);
-      return;
-    } else if (currentPage < 1) {
-      setCurrentPage(1);
-      toast.error('Page Number was Invalid. Try Again Now!');
       return;
     }
 
-    setSearchTerm(searchTerm);
-    setCurrentPage(currentPage);
+    if (pageNumber < 1) {
+      setCurrentPage(1);
+      toast.error('Page number was invalid. Try again now!');
+      return;
+    }
+
+    setError(null);
+    setIsLoading(true);
 
     try {
-
-      const data = await searchTorrent({ query: searchTerm, page: currentPage, site: siteToSearch });
-
-      if (Object.keys(data)[0] === 'error') {
+      const data = await searchTorrent({
+        query,
+        page: pageNumber,
+        site: siteToSearch,
+      });
+      console.log("🚀 ~ handleSearch ~ data:", data);
+      
+      if (data.error) {
+        console.log("🚀 ~ data.error Triggered");
         throw new Error(data.error);
-      } else {
-        setTorrents(data);
-        console.log("Response from searchTorrent: ", data);
-
       }
-
-
+      
+      setTorrents(data);
+      console.log("🚀 ~ handleSearch ", torrents);
     } catch (error) {
-      console.error('Error in handleSearch:', error);
+      console.error('Error in handleSearchSubmit:', error);
       setError(error);
     } finally {
       setIsLoading(false);
     }
-
-
-
-
-
-
-    console.log('Current Page:', currentPage, "searchTerm:", searchTerm);
   };
 
+  // ////////////////////////////////////////////////////////////////////////////////  
+  const parseSize = (size) => {
+    const units = { "MB": 1, "GB": 1024, "TB": 1048576 };
+    const match = size.match(/([\d.]+)\s*(MB|GB|TB)/);
+    return match ? parseFloat(match[1]) * units[match[2]] : 0;
+  };
+  // ////////////////////////////////////////////////////////////////////////////////
+  const parseDate = (date) => {
+    const [day, month, year] = date.split("/").map(Number);
+    return new Date(year + 2000, month - 1, day); // Assuming 21 means 2021, etc.
+  };
+  // ////////////////////////////////////////////////////////////////////////////////
+  
+
+  // ////////////////////////////////////////////////////////////////////////////////
+
+  const handleSort = () => {
+
+    console.log('sortKey', sortKey);
+    console.log('sortOrder', sortOrder);
+  
+    const sortedTorrents = [...torrents].sort((a, b) => {
+      let valA, valB;
+      if (sortKey === "size") {
+        valA = parseSize(a.size);
+        valB = parseSize(b.size);
+      } else if (sortKey === "dateuploaded") {
+        valA = parseDate(a.dateuploaded);
+        valB = parseDate(b.dateuploaded);
+      } else {
+        valA = Number(a[sortKey]);
+        valB = Number(b[sortKey]);
+      }
+      return sortOrder === "desc" ? valA - valB : valB - valA;
+    });
+
+    setTorrents(sortedTorrents);
+
+  }
 
 
+console.log('torrents', torrents);
   return (
     <>
-      <div className="container px-4 py-8 mx-auto">
-        <div className='flex justify-center w-full mb-12 font-mono text-3xl font-semibold md:text-5xl' >
+      <div className="container px-2 py-8 mx-auto">
+        <div className='flex justify-center w-full mb-6 font-mono text-2xl font-semibold md:text-4xl' >
           Search
         </div>
 
         <SiteSelector siteToSearch={siteToSearch} setSiteToSearch={setSiteToSearch} />
 
-        <div className="max-w-3xl mt-4 md:mt-6 mx-auto mb-8">
+        <div className="max-w-3xl mt-2 md:mt-4 mx-auto mb-4 md:mb-8">
           <form onSubmit={handleSearch} className="flex gap-2">
             <input
               type="text"
@@ -104,7 +141,39 @@ console.log(settings.resultLayout);
 
         {
           torrents && torrents.length > 0 && (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="flex gap-2 mb-4">
+            <select
+              className="select select-sm select-bordered"
+              value={sortKey}
+              onChange={(e) => {
+                setSortKey(e.target.value);
+                handleSort();
+              }}
+            >
+              <option value="seeders">Seeders</option>            
+              <option value="size">Size</option>
+              <option value="dateuploaded">Date Uploaded</option>
+            </select>
+            <select
+              className="select select-sm select-bordered"
+              value={sortOrder}
+              onChange={(e) => {
+                setSortOrder(e.target.value);
+                handleSort();
+              }}
+            >
+              <option value="asc">Ascending</option>            
+              <option value="desc">Descending</option>
+            </select>
+          
+          </div>
+          )
+
+        }
+
+        {
+          torrents && torrents.length > 0 && (
+            <div className="grid grid-cols-1 gap-2 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
               {torrents.map((torrent) => (
                 <TorrentCard key={torrent.url} torrent={torrent} />
               ))}
