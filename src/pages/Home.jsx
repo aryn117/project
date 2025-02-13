@@ -25,12 +25,12 @@ function Home() {
   const [sortBy, setSortBy] = useState('');
   const [sortOrder, setSortOrder] = useState('desc');
   const [sortKey, setSortKey] = useState('seeders');
-  
-  
-  
+
+
+
   // ////////////////////////////////////////////////////////////////////////////////
   const handleSearch = async (event) => {
-    event.preventDefault();
+    if(event) event.preventDefault();
 
     const pageNumber = currentPage;
     const query = searchTerm.trim();
@@ -56,12 +56,12 @@ function Home() {
         site: siteToSearch,
       });
       console.log("🚀 ~ handleSearch ~ data:", data);
-      
+
       if (data.error) {
         console.log("🚀 ~ data.error Triggered");
         throw new Error(data.error);
       }
-      
+
       setTorrents(data);
       console.log("🚀 ~ handleSearch ", torrents);
     } catch (error) {
@@ -84,7 +84,7 @@ function Home() {
     return new Date(year + 2000, month - 1, day); // Assuming 21 means 2021, etc.
   };
   // ////////////////////////////////////////////////////////////////////////////////
-  
+
 
   // ////////////////////////////////////////////////////////////////////////////////
 
@@ -92,7 +92,7 @@ function Home() {
 
     console.log('sortKey', sortKey);
     console.log('sortOrder', sortOrder);
-  
+
     const sortedTorrents = [...torrents].sort((a, b) => {
       let valA, valB;
       if (sortKey === "size") {
@@ -113,7 +113,7 @@ function Home() {
   }
 
 
-console.log('torrents', torrents);
+  console.log('torrents', torrents);
   return (
     <>
       <div className="container px-2 py-8 mx-auto">
@@ -141,36 +141,46 @@ console.log('torrents', torrents);
 
         {
           torrents && torrents.length > 0 && (
-            <div className="flex gap-2 mb-4">
-            <select
-              className="select select-sm select-bordered"
-              value={sortKey}
-              onChange={(e) => {
-                setSortKey(e.target.value);
-                handleSort();
-              }}
-            >
-              <option value="seeders">Seeders</option>            
-              <option value="size">Size</option>
-              <option value="dateuploaded">Date Uploaded</option>
-            </select>
-            <select
-              className="select select-sm select-bordered"
-              value={sortOrder}
-              onChange={(e) => {
-                setSortOrder(e.target.value);
-                handleSort();
-              }}
-            >
-              <option value="asc">Ascending</option>            
-              <option value="desc">Descending</option>
-            </select>
-          
-          </div>
+            <div className='flex w-full max-w-3xl flex-row justify-between mb-2 items-center'>
+            <div className="flex gap-2 flex-col sm:flex-row ">
+              <select
+                className="select select-sm w-fit select-bordered"
+                value={sortKey}
+                onChange={(e) => {
+                  setSortKey(e.target.value);
+                  handleSort();
+                }}
+              >
+                <option value="seeders">Seeders</option>
+                <option value="size">Size</option>
+                <option value="dateuploaded">Date Uploaded</option>
+              </select>
+              <select
+                className="select select-sm select-bordered"
+                value={sortOrder}
+                onChange={(e) => {
+                  setSortOrder(e.target.value);
+                  handleSort();
+                }}
+              >
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+
+            </div>
+         
+
+              <div className="flex  justify-center items-center w-full py-2  z-50  ">
+                <button className="join-btn btn-sm btn-outline  btn" onClick={() => { setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage); handleSearch() }} ><FaCaretLeft /></button>
+                <button className="join-item btn-sm btn-outline mx-2 btn">{currentPage}</button>
+                <button className="join-item btn-sm btn-outline   btn" onClick={() => { setCurrentPage(currentPage + 1); handleSearch() }} > <FaCaretRight /> </button>
+              </div>
+            
+            </div>
           )
 
         }
-
+ {isLoading && <LoadingSpinner />}
         {
           torrents && torrents.length > 0 && (
             <div className="grid grid-cols-1 gap-2 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -184,7 +194,7 @@ console.log('torrents', torrents);
 
 
 
-        {isLoading && <LoadingSpinner />}
+       
 
         {error && (
           <div className="alert alert-error">
@@ -194,14 +204,7 @@ console.log('torrents', torrents);
 
 
       </div>
-      {torrents && torrents.length > 0 &&
-
-        <div className="flex mb-6 bottom-0 h-12  justify-center items-center w-full py-2  z-50  ">
-          <button className="join-btn btn-outline mx-2 btn" onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)} ><FaCaretLeft /></button>
-          <button className="join-item btn-outline mx-2 btn">{currentPage}</button>
-          <button className="join-item btn-outline mx-2  btn" onClick={() => setCurrentPage(currentPage + 1)} > <FaCaretRight /> </button>
-        </div>
-      }
+      
     </>
   );
 }
